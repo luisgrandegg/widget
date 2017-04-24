@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 13);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -10328,6 +10328,649 @@ return jQuery;
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports) {
+
+/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+
+/** Used as references for various `Number` constants. */
+var MAX_SAFE_INTEGER = 9007199254740991;
+
+/** `Object#toString` result references. */
+var argsTag = '[object Arguments]',
+    funcTag = '[object Function]',
+    genTag = '[object GeneratorFunction]';
+
+/** Used to detect unsigned integer values. */
+var reIsUint = /^(?:0|[1-9]\d*)$/;
+
+/**
+ * A faster alternative to `Function#apply`, this function invokes `func`
+ * with the `this` binding of `thisArg` and the arguments of `args`.
+ *
+ * @private
+ * @param {Function} func The function to invoke.
+ * @param {*} thisArg The `this` binding of `func`.
+ * @param {Array} args The arguments to invoke `func` with.
+ * @returns {*} Returns the result of `func`.
+ */
+function apply(func, thisArg, args) {
+  switch (args.length) {
+    case 0: return func.call(thisArg);
+    case 1: return func.call(thisArg, args[0]);
+    case 2: return func.call(thisArg, args[0], args[1]);
+    case 3: return func.call(thisArg, args[0], args[1], args[2]);
+  }
+  return func.apply(thisArg, args);
+}
+
+/**
+ * The base implementation of `_.times` without support for iteratee shorthands
+ * or max array length checks.
+ *
+ * @private
+ * @param {number} n The number of times to invoke `iteratee`.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns the array of results.
+ */
+function baseTimes(n, iteratee) {
+  var index = -1,
+      result = Array(n);
+
+  while (++index < n) {
+    result[index] = iteratee(index);
+  }
+  return result;
+}
+
+/**
+ * Creates a unary function that invokes `func` with its argument transformed.
+ *
+ * @private
+ * @param {Function} func The function to wrap.
+ * @param {Function} transform The argument transform.
+ * @returns {Function} Returns the new function.
+ */
+function overArg(func, transform) {
+  return function(arg) {
+    return func(transform(arg));
+  };
+}
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString = objectProto.toString;
+
+/** Built-in value references. */
+var propertyIsEnumerable = objectProto.propertyIsEnumerable;
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeKeys = overArg(Object.keys, Object),
+    nativeMax = Math.max;
+
+/** Detect if properties shadowing those on `Object.prototype` are non-enumerable. */
+var nonEnumShadows = !propertyIsEnumerable.call({ 'valueOf': 1 }, 'valueOf');
+
+/**
+ * Creates an array of the enumerable property names of the array-like `value`.
+ *
+ * @private
+ * @param {*} value The value to query.
+ * @param {boolean} inherited Specify returning inherited property names.
+ * @returns {Array} Returns the array of property names.
+ */
+function arrayLikeKeys(value, inherited) {
+  // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
+  // Safari 9 makes `arguments.length` enumerable in strict mode.
+  var result = (isArray(value) || isArguments(value))
+    ? baseTimes(value.length, String)
+    : [];
+
+  var length = result.length,
+      skipIndexes = !!length;
+
+  for (var key in value) {
+    if ((inherited || hasOwnProperty.call(value, key)) &&
+        !(skipIndexes && (key == 'length' || isIndex(key, length)))) {
+      result.push(key);
+    }
+  }
+  return result;
+}
+
+/**
+ * Assigns `value` to `key` of `object` if the existing value is not equivalent
+ * using [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+ * for equality comparisons.
+ *
+ * @private
+ * @param {Object} object The object to modify.
+ * @param {string} key The key of the property to assign.
+ * @param {*} value The value to assign.
+ */
+function assignValue(object, key, value) {
+  var objValue = object[key];
+  if (!(hasOwnProperty.call(object, key) && eq(objValue, value)) ||
+      (value === undefined && !(key in object))) {
+    object[key] = value;
+  }
+}
+
+/**
+ * The base implementation of `_.keys` which doesn't treat sparse arrays as dense.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ */
+function baseKeys(object) {
+  if (!isPrototype(object)) {
+    return nativeKeys(object);
+  }
+  var result = [];
+  for (var key in Object(object)) {
+    if (hasOwnProperty.call(object, key) && key != 'constructor') {
+      result.push(key);
+    }
+  }
+  return result;
+}
+
+/**
+ * The base implementation of `_.rest` which doesn't validate or coerce arguments.
+ *
+ * @private
+ * @param {Function} func The function to apply a rest parameter to.
+ * @param {number} [start=func.length-1] The start position of the rest parameter.
+ * @returns {Function} Returns the new function.
+ */
+function baseRest(func, start) {
+  start = nativeMax(start === undefined ? (func.length - 1) : start, 0);
+  return function() {
+    var args = arguments,
+        index = -1,
+        length = nativeMax(args.length - start, 0),
+        array = Array(length);
+
+    while (++index < length) {
+      array[index] = args[start + index];
+    }
+    index = -1;
+    var otherArgs = Array(start + 1);
+    while (++index < start) {
+      otherArgs[index] = args[index];
+    }
+    otherArgs[start] = array;
+    return apply(func, this, otherArgs);
+  };
+}
+
+/**
+ * Copies properties of `source` to `object`.
+ *
+ * @private
+ * @param {Object} source The object to copy properties from.
+ * @param {Array} props The property identifiers to copy.
+ * @param {Object} [object={}] The object to copy properties to.
+ * @param {Function} [customizer] The function to customize copied values.
+ * @returns {Object} Returns `object`.
+ */
+function copyObject(source, props, object, customizer) {
+  object || (object = {});
+
+  var index = -1,
+      length = props.length;
+
+  while (++index < length) {
+    var key = props[index];
+
+    var newValue = customizer
+      ? customizer(object[key], source[key], key, object, source)
+      : undefined;
+
+    assignValue(object, key, newValue === undefined ? source[key] : newValue);
+  }
+  return object;
+}
+
+/**
+ * Creates a function like `_.assign`.
+ *
+ * @private
+ * @param {Function} assigner The function to assign values.
+ * @returns {Function} Returns the new assigner function.
+ */
+function createAssigner(assigner) {
+  return baseRest(function(object, sources) {
+    var index = -1,
+        length = sources.length,
+        customizer = length > 1 ? sources[length - 1] : undefined,
+        guard = length > 2 ? sources[2] : undefined;
+
+    customizer = (assigner.length > 3 && typeof customizer == 'function')
+      ? (length--, customizer)
+      : undefined;
+
+    if (guard && isIterateeCall(sources[0], sources[1], guard)) {
+      customizer = length < 3 ? undefined : customizer;
+      length = 1;
+    }
+    object = Object(object);
+    while (++index < length) {
+      var source = sources[index];
+      if (source) {
+        assigner(object, source, index, customizer);
+      }
+    }
+    return object;
+  });
+}
+
+/**
+ * Checks if `value` is a valid array-like index.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
+ * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
+ */
+function isIndex(value, length) {
+  length = length == null ? MAX_SAFE_INTEGER : length;
+  return !!length &&
+    (typeof value == 'number' || reIsUint.test(value)) &&
+    (value > -1 && value % 1 == 0 && value < length);
+}
+
+/**
+ * Checks if the given arguments are from an iteratee call.
+ *
+ * @private
+ * @param {*} value The potential iteratee value argument.
+ * @param {*} index The potential iteratee index or key argument.
+ * @param {*} object The potential iteratee object argument.
+ * @returns {boolean} Returns `true` if the arguments are from an iteratee call,
+ *  else `false`.
+ */
+function isIterateeCall(value, index, object) {
+  if (!isObject(object)) {
+    return false;
+  }
+  var type = typeof index;
+  if (type == 'number'
+        ? (isArrayLike(object) && isIndex(index, object.length))
+        : (type == 'string' && index in object)
+      ) {
+    return eq(object[index], value);
+  }
+  return false;
+}
+
+/**
+ * Checks if `value` is likely a prototype object.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a prototype, else `false`.
+ */
+function isPrototype(value) {
+  var Ctor = value && value.constructor,
+      proto = (typeof Ctor == 'function' && Ctor.prototype) || objectProto;
+
+  return value === proto;
+}
+
+/**
+ * Performs a
+ * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+ * comparison between two values to determine if they are equivalent.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to compare.
+ * @param {*} other The other value to compare.
+ * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+ * @example
+ *
+ * var object = { 'a': 1 };
+ * var other = { 'a': 1 };
+ *
+ * _.eq(object, object);
+ * // => true
+ *
+ * _.eq(object, other);
+ * // => false
+ *
+ * _.eq('a', 'a');
+ * // => true
+ *
+ * _.eq('a', Object('a'));
+ * // => false
+ *
+ * _.eq(NaN, NaN);
+ * // => true
+ */
+function eq(value, other) {
+  return value === other || (value !== value && other !== other);
+}
+
+/**
+ * Checks if `value` is likely an `arguments` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an `arguments` object,
+ *  else `false`.
+ * @example
+ *
+ * _.isArguments(function() { return arguments; }());
+ * // => true
+ *
+ * _.isArguments([1, 2, 3]);
+ * // => false
+ */
+function isArguments(value) {
+  // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
+  return isArrayLikeObject(value) && hasOwnProperty.call(value, 'callee') &&
+    (!propertyIsEnumerable.call(value, 'callee') || objectToString.call(value) == argsTag);
+}
+
+/**
+ * Checks if `value` is classified as an `Array` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an array, else `false`.
+ * @example
+ *
+ * _.isArray([1, 2, 3]);
+ * // => true
+ *
+ * _.isArray(document.body.children);
+ * // => false
+ *
+ * _.isArray('abc');
+ * // => false
+ *
+ * _.isArray(_.noop);
+ * // => false
+ */
+var isArray = Array.isArray;
+
+/**
+ * Checks if `value` is array-like. A value is considered array-like if it's
+ * not a function and has a `value.length` that's an integer greater than or
+ * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
+ * @example
+ *
+ * _.isArrayLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isArrayLike(document.body.children);
+ * // => true
+ *
+ * _.isArrayLike('abc');
+ * // => true
+ *
+ * _.isArrayLike(_.noop);
+ * // => false
+ */
+function isArrayLike(value) {
+  return value != null && isLength(value.length) && !isFunction(value);
+}
+
+/**
+ * This method is like `_.isArrayLike` except that it also checks if `value`
+ * is an object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an array-like object,
+ *  else `false`.
+ * @example
+ *
+ * _.isArrayLikeObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isArrayLikeObject(document.body.children);
+ * // => true
+ *
+ * _.isArrayLikeObject('abc');
+ * // => false
+ *
+ * _.isArrayLikeObject(_.noop);
+ * // => false
+ */
+function isArrayLikeObject(value) {
+  return isObjectLike(value) && isArrayLike(value);
+}
+
+/**
+ * Checks if `value` is classified as a `Function` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a function, else `false`.
+ * @example
+ *
+ * _.isFunction(_);
+ * // => true
+ *
+ * _.isFunction(/abc/);
+ * // => false
+ */
+function isFunction(value) {
+  // The use of `Object#toString` avoids issues with the `typeof` operator
+  // in Safari 8-9 which returns 'object' for typed array and other constructors.
+  var tag = isObject(value) ? objectToString.call(value) : '';
+  return tag == funcTag || tag == genTag;
+}
+
+/**
+ * Checks if `value` is a valid array-like length.
+ *
+ * **Note:** This method is loosely based on
+ * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
+ * @example
+ *
+ * _.isLength(3);
+ * // => true
+ *
+ * _.isLength(Number.MIN_VALUE);
+ * // => false
+ *
+ * _.isLength(Infinity);
+ * // => false
+ *
+ * _.isLength('3');
+ * // => false
+ */
+function isLength(value) {
+  return typeof value == 'number' &&
+    value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+}
+
+/**
+ * Checks if `value` is the
+ * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+ * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(_.noop);
+ * // => true
+ *
+ * _.isObject(null);
+ * // => false
+ */
+function isObject(value) {
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
+}
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Assigns own enumerable string keyed properties of source objects to the
+ * destination object. Source objects are applied from left to right.
+ * Subsequent sources overwrite property assignments of previous sources.
+ *
+ * **Note:** This method mutates `object` and is loosely based on
+ * [`Object.assign`](https://mdn.io/Object/assign).
+ *
+ * @static
+ * @memberOf _
+ * @since 0.10.0
+ * @category Object
+ * @param {Object} object The destination object.
+ * @param {...Object} [sources] The source objects.
+ * @returns {Object} Returns `object`.
+ * @see _.assignIn
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ * }
+ *
+ * function Bar() {
+ *   this.c = 3;
+ * }
+ *
+ * Foo.prototype.b = 2;
+ * Bar.prototype.d = 4;
+ *
+ * _.assign({ 'a': 0 }, new Foo, new Bar);
+ * // => { 'a': 1, 'c': 3 }
+ */
+var assign = createAssigner(function(object, source) {
+  if (nonEnumShadows || isPrototype(source) || isArrayLike(source)) {
+    copyObject(source, keys(source), object);
+    return;
+  }
+  for (var key in source) {
+    if (hasOwnProperty.call(source, key)) {
+      assignValue(object, key, source[key]);
+    }
+  }
+});
+
+/**
+ * Creates an array of the own enumerable property names of `object`.
+ *
+ * **Note:** Non-object values are coerced to objects. See the
+ * [ES spec](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
+ * for more details.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ *   this.b = 2;
+ * }
+ *
+ * Foo.prototype.c = 3;
+ *
+ * _.keys(new Foo);
+ * // => ['a', 'b'] (iteration order is not guaranteed)
+ *
+ * _.keys('hi');
+ * // => ['0', '1']
+ */
+function keys(object) {
+  return isArrayLike(object) ? arrayLikeKeys(object) : baseKeys(object);
+}
+
+module.exports = assign;
+
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10335,9 +10978,166 @@ return jQuery;
 
 var $ = __webpack_require__(0);
 
-var $window = $(window);
-var $body = $('body');
 var $head = $('head');
+
+var $styles = $('<style>');
+
+var styles = [];
+
+function parseStylesHash (selector, stylesHash) {
+  var styles = selector + '{';
+  for (var rule in stylesHash) {
+    styles += rule + ':' + stylesHash[rule] + ';';
+  }
+  styles += '}';
+  return styles;
+}
+
+function addStyle (selector, stylesHash) {
+  styles.push({
+    selector: '.' + selector,
+    stylesHash: stylesHash
+  });
+  cacheStyles();
+  writeStyles();
+}
+
+function cacheStyles () {
+  var stylesString = '';
+  styles.forEach(function (style) {
+    stylesString += parseStylesHash(style.selector, style.stylesHash);
+  });
+  $styles.text(stylesString);
+  return $styles;
+}
+
+function writeStyles () {
+  $styles.detach();
+  $head.append($styles);
+}
+
+module.exports = {
+  addStyle: addStyle
+};
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var $ = __webpack_require__(0);
+var assign = __webpack_require__(1);
+
+var styleLoader = __webpack_require__(2);
+var Slider = __webpack_require__(7);
+var Button = __webpack_require__(6);
+
+var $window = $(window);
+
+var defaults = {
+  element: 'body',
+  cssNamespace: 'insided-community'
+};
+
+function CommunitySlider (options) {
+  this.options = assign({}, defaults, options);;
+  this.element = this.options.element;
+  this.$element = $(this.element);
+  this.button = new Button(this.$element, this.options);
+  this.slider = new Slider(this.$element, this.options);
+  this.init();
+}
+
+function onCommunitySliderStart () {
+  this.button.hide();
+  this.slider.render();
+}
+
+function onCommunitySliderRestart () {
+  this.button.show();
+  this.slider.destroy();
+}
+
+function init () {
+  this.button.render();
+  $window.on('insided:community-slider:start', this.onCommunitySliderStart.bind(this));
+  $window.on('insided:community-slider:restart', this.onCommunitySliderRestart.bind(this));
+}
+
+CommunitySlider.prototype.init = init;
+CommunitySlider.prototype.onCommunitySliderStart = onCommunitySliderStart;
+CommunitySlider.prototype.onCommunitySliderRestart = onCommunitySliderRestart;
+
+module.exports = CommunitySlider;
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports) {
+
+module.exports = [
+	{
+		"user": {
+			"name": "John",
+			"rank": "Beautiful user",
+			"avatar": "https://media.licdn.com/mpr/mpr/shrinknp_100_100/AAEAAQAAAAAAAAhMAAAAJGY3ZDE2M2IyLTk0OWUtNGU5MC05NTQwLWI0ZGUyNTkyODk5NQ.jpg"
+		},
+		"title": "This post is awesome dudeeee",
+		"content": "This is the content of the post ohh yeaaaah, ohh yeaahhh, the content of the post"
+	},
+	{
+		"user": {
+			"name": "Mr. Potato",
+			"rank": "Potato user",
+			"avatar": "https://media.licdn.com/mpr/mpr/shrinknp_100_100/AAEAAQAAAAAAAAhMAAAAJGY3ZDE2M2IyLTk0OWUtNGU5MC05NTQwLWI0ZGUyNTkyODk5NQ.jpg"
+		},
+		"title": "This post is awesome potato dudeeee",
+		"content": "This is the content of the post ohh potatooo, ohh potatooo, the content of the post"
+	}
+];
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var $ = __webpack_require__(0);
+
+var mockData = __webpack_require__(4);
+
+function DataLoader (key) {
+  this.key = key;
+}
+
+function fetch () {
+  var $deferred = $.Deferred();
+  $deferred.resolve(mockData);
+  return $deferred.promise();
+}
+
+DataLoader.prototype.fetch = fetch;
+
+module.exports = DataLoader;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var $ = __webpack_require__(0);
+var assign = __webpack_require__(1);
+
+var styleLoader = __webpack_require__(2);
+
+var $window = $(window);
 
 var buttonStyles = {
   'position': 'fixed',
@@ -10354,7 +11154,85 @@ var buttonStyles = {
   'cursor': 'pointer'
 };
 
-var communitySliderStyles = {
+var defaults = {
+  styles: buttonStyles,
+  text: 'Community Help'
+};
+
+function triggerStart () {
+  $window.trigger('insided:community-slider:start');
+}
+
+function Button ($element, options) {
+  this.$element = $element;
+  this.options = assign({}, defaults, options);
+  this.cssClass = this.options.cssNamespace;
+  this.init();
+}
+
+function init () {
+  var $button = $('<button>' + this.options.text +'</button>')
+    .addClass(this.cssClass)
+    .on('click', triggerStart);
+  this.html = $button;
+  styleLoader.addStyle(this.cssClass, this.options.styles);
+  return this;
+}
+
+function getHtml () {
+  return this.html;
+}
+
+function getStyles () {
+  return this.options.styles;
+}
+
+function render () {
+  this.getHtml().detach();
+  this.$element.append(this.getHtml());
+  return this;
+}
+
+function show () {
+  this.getHtml().show();
+  return this;
+}
+
+function hide () {
+  this.getHtml().hide();
+  return this;
+}
+
+Button.prototype.init = init;
+Button.prototype.getHtml = getHtml;
+Button.prototype.getStyles = getStyles;
+Button.prototype.render = render;
+Button.prototype.show = show;
+Button.prototype.hide = hide;
+
+module.exports = Button;
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var $ = __webpack_require__(0);
+var assign = __webpack_require__(1);
+
+var styleLoader = __webpack_require__(2);
+
+var SliderHeader = __webpack_require__(12);
+var SliderFilters = __webpack_require__(10);
+var SliderCards = __webpack_require__(9);
+var SliderFooter = __webpack_require__(11);
+
+var $window = $(window);
+
+var sliderStyles = {
   'position': 'fixed',
   'box-shadow': '10px 0px 40px -1px black',
   'top': 0,
@@ -10365,414 +11243,151 @@ var communitySliderStyles = {
   'z-index': 999999
 };
 
-var communitySliderHeaderStyles = {
-  'position': 'relative',
-  'background-color': '#1DADF5',
-  'padding': '25px',
-  'color': '#FFF'
+var defaults = {
+  styles: sliderStyles,
+  cssClass: '-slider'
 };
 
-var communitySliderTitleStyles = {
-  'margin-top': 0
-};
-
-var communitySliderCloseButtonStyles = {
-  'position': 'absolute',
-  'text-decoration': 'none',
-  'right': '25px',
-  'top': '25px',
-  'color': '#FFF'
-};
-
-var communitySliderCardsStyles = {
-};
-
-var communitySliderCardStyles = {
-  'padding': '25px',
-  'border-bottom': '1px solid black',
-  'display': 'table'
-};
-
-var communitySliderUserAvatarStyles = {
-  'display': 'table-cell',
-  'vertical-align': 'top',
-  'text-align': 'center',
-  'overflow': 'hidden',
-  'padding-right': '25px'
-};
-
-var communitySliderUserAvatarImageStyles = {
-  'width': '50px',
-  'height': '50px',
-  'border-radius': '100%'
-};
-
-var communitySliderCardContentStyles = {
-  'display': 'table-cell',
-  'vertical-align': 'top'
-};
-
-var communitySliderUserNameStyles = {
-  'color': '#1DADF5',
-  'margin-right': '10px'
-};
-
-var communitySliderUserRankStyles = {
-
-};
-
-var communitySliderCardTitleStyles = {
-
-};
-
-var communitySliderCardTextStyles = {
-
-}
-
-var communitySliderFooterStyles = {
-  'padding': '25px'
-}
-
-function CommunitySlider () {
+function Slider ($element, options) {
+  this.$element = $element;
+  this.options = assign({}, defaults, options);
+  this.cssClass = this.options.cssNamespace + this.options.cssClass;
   this.init();
 }
 
-function parseStylesHash (selector, stylesHash) {
-  var styles = selector + '{';
-  for (var rule in stylesHash) {
-    styles += rule + ':' + stylesHash[rule] + ';';
-  }
-  styles += '}';
-  return styles;
+function init () {
+  var $slider = $('<div>')
+    .addClass(this.cssClass);
+  this.header = new SliderHeader($slider);
+  this.filters = new SliderFilters($slider);
+  this.cards = new SliderCards($slider);
+  this.footer = new SliderFooter($slider);
+  this.html = $slider;
+  styleLoader.addStyle(this.cssClass, this.options.styles);
+  return this;
+}
+
+function getHtml () {
+  return this.html;
 }
 
 function getStyles () {
-  var $styles = $('<style>');
-  var styles = '';
-  styles += parseStylesHash('.insided-community', buttonStyles);
-  styles += parseStylesHash('.insided-community-slider', communitySliderStyles);
-  styles += parseStylesHash('.insided-community-slider__header', communitySliderHeaderStyles);
-  styles += parseStylesHash('.insided-community-slider__title', communitySliderTitleStyles);
-  styles += parseStylesHash('.insided-community-slider__close', communitySliderCloseButtonStyles);
-  styles += parseStylesHash('.insided-community-slider__cards', communitySliderCardsStyles);
-  styles += parseStylesHash('.insided-community-slider__card', communitySliderCardStyles);
-  styles += parseStylesHash('.insided-community-slider__user-avatar', communitySliderUserAvatarStyles);
-  styles += parseStylesHash('.insided-community-slider__user-avatar--image', communitySliderUserAvatarImageStyles);
-  styles += parseStylesHash('.insided-community-slider__card-content', communitySliderCardContentStyles);
-  styles += parseStylesHash('.insided-community-slider__user-name', communitySliderUserNameStyles);
-  styles += parseStylesHash('.insided-community-slider__user-rank', communitySliderUserRankStyles);
-  styles += parseStylesHash('.insided-community-slider__card-title', communitySliderCardTitleStyles);
-  styles += parseStylesHash('.insided-community-slider__card-text', communitySliderCardTextStyles);
-  styles += parseStylesHash('.insided-community-slider__footer', communitySliderFooterStyles);
-  $styles.text(styles);
-  return $styles;
+  return this.options.styles;
 }
 
-function getButton () {
-  return $('<button>Community slider</button>')
-    .addClass('insided-community')
-    .on('click', function () {
-      $window.trigger('insided:community-slider:start');
-    });
+function render () {
+  this.getHtml().detach();
+  this.header.render();
+  this.filters.render();
+  this.cards.render();
+  this.footer.render();
+  this.$element.append(this.getHtml());
+  return this;
 }
 
-function getSliderHeader () {
-  var $header = $('<header>')
-    .addClass('insided-community-slider__header');
-  var $title = $('<h3>Demo Community</h3>')
-    .addClass('insided-community-slider__title');
-  var $closeButton = $('<a href="#">X</a>')
-    .addClass('insided-community-slider__close')
-    .on('click', function (e) {
-      e.preventDefault();
-      $window.trigger('insided:community-slider:restart');
-    });
-  $header.append($title);
-  $header.append($closeButton);
-  return $header;
+function destroy () {
+  this.getHtml().detach();
+  return this;
 }
 
-function getSliderFilters () {
-  var $filters = $('<div>')
-    .addClass('insided-community-slider__filters');
-  return $filters;
+function setData (data) {
+  this.data = data;
 }
 
-function getSliderCard () {
-  var $card = $('<div>')
-    .addClass('insided-community-slider__card')
-  var $userAvatarImage = $('<img>')
-    .attr('src', 'https://media.licdn.com/mpr/mpr/shrinknp_100_100/AAEAAQAAAAAAAAhMAAAAJGY3ZDE2M2IyLTk0OWUtNGU5MC05NTQwLWI0ZGUyNTkyODk5NQ.jpg')
-    .addClass('insided-community-slider__user-avatar--image');
-  var $userAvatar = $('<div>')
-    .addClass('insided-community-slider__user-avatar')
-    .append($userAvatarImage)
-  var $userInfo = $('<div>')
-    .addClass('insided-community-slider__user-info');
-  var $userName = $('<span>John</span>')
-    .addClass('insided-community-slider__user-name');
-  var $userRank = $('<span>Johns rank</span>')
-    .addClass('insided-community-slider__user-rank');
-  $userInfo
-    .append($userName)
-    .append($userRank);
-
-  var $cardContent = $('<article>')
-    .addClass('insided-community-slider__card-content');
-  var $cardTitle = $('<h4>This post is awesome dudeeee</h4>')
-    .addClass('insided-community-slider__card-title');
-  var $cardText = $('<p>This is the content of the post ohh yeaaaah, ohh yeaahhh, the content of the post</p>')
-    .addClass('insided-community-slider__card-text');
-  $cardContent
-    .append($userInfo)
-    .append($cardTitle)
-    .append($cardText);
-  $card
-    .append($userAvatar)
-    .append($cardContent);
-  return $card;
+function getData () {
+  return this.data;
 }
 
-function getSliderCards () {
-  var $cards = $('<div>')
-    .addClass('insided-community-slider__cards');
-  $cards.append(getSliderCard());
-  $cards.append(getSliderCard());
-  return $cards;
-}
+Slider.prototype.init = init;
+Slider.prototype.getHtml = getHtml;
+Slider.prototype.getStyles = getStyles;
+Slider.prototype.render = render;
+Slider.prototype.destroy = destroy;
+Slider.prototype.setData = setData;
+Slider.prototype.getData = getData;
 
-function getSliderFooter () {
-  var $footer = $('<footer>')
-    .text('This is the footer')
-    .addClass('insided-community-slider__footer');
-  return $footer;
-}
+module.exports = Slider;
 
-function getSlider () {
-  var $slider = $('<div>')
-    .addClass('insided-community-slider');
-  $slider.append(getSliderHeader());
-  $slider.append(getSliderFilters());
-  $slider.append(getSliderCards());
-  $slider.append(getSliderFooter());
-  return $slider;
-}
 
-function initSlider () {
-  this.$slider = this.getSlider();
-  $body.append(this.$slider);
-}
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
 
-function destroySlider () {
-  this.$slider.remove();
-  this.$slider = null;
-}
+"use strict";
 
-function init () {
-  this.$button = this.getButton();
-  this.$styles = this.getStyles();
-  $body.append(this.$button);
-  $head.append(this.$styles);
-  $window.on('insided:community-slider:start', function () {
-    this.$button.hide();
-    this.initSlider();
-  }.bind(this));
-  $window.on('insided:community-slider:restart', function () {
-    this.$button.show();
-    this.destroySlider();
-  }.bind(this));
-}
-
-CommunitySlider.prototype.init = init;
-CommunitySlider.prototype.getButton = getButton;
-CommunitySlider.prototype.getStyles = getStyles;
-CommunitySlider.prototype.getSlider = getSlider;
-CommunitySlider.prototype.initSlider = initSlider;
-CommunitySlider.prototype.destroySlider = destroySlider;
-
-'use strict';
 
 var $ = __webpack_require__(0);
+var assign = __webpack_require__(1);
 
-var $window = $(window);
-var $body = $('body');
-var $head = $('head');
+var styleLoader = __webpack_require__(2);
 
-var buttonStyles = {
-  'position': 'fixed',
-  'border': 0,
-  'border-radius': '2px',
-  'background-color': '#1DADF5',
-  'z-index': 999999,
-  'right': 0,
-  'top': '50%',
-  'margin-top': '-20px',
-  'color': '#FFF',
-  'font-size': '16px',
-  'padding': '15px',
-  'cursor': 'pointer'
-};
+var stylesLoaded = false;
 
-var communitySliderStyles = {
-  'position': 'fixed',
-  'box-shadow': '10px 0px 40px -1px black',
-  'z-index': 999999,
-  'top': 0,
-  'bottom': 0,
-  'right': 0,
-  'width': '500px',
-  'background': '#FFF'
-};
-
-var communitySliderHeaderStyles = {
-  'position': 'relative',
-  'background-color': '#1DADF5',
-  'padding': '25px',
-  'color': '#FFF'
-};
-
-var communitySliderTitleStyles = {
-  'margin-top': 0
-};
-
-var communitySliderCloseButtonStyles = {
-  'position': 'absolute',
-  'text-decoration': 'none',
-  'right': '25px',
-  'top': '25px',
-  'color': '#FFF'
-};
-
-var communitySliderCardsStyles = {
-};
-
-var communitySliderCardStyles = {
+var sliderCardStyles = {
   'padding': '25px',
   'border-bottom': '1px solid black',
   'display': 'table'
 };
 
-var communitySliderUserAvatarStyles = {
-  'box-sizing': 'border-box',
+var sliderUserAvatarStyles = {
   'display': 'table-cell',
   'vertical-align': 'top',
   'text-align': 'center',
   'overflow': 'hidden',
-  'width': '75px',
   'padding-right': '25px'
 };
 
-var communitySliderUserAvatarImageStyles = {
+var sliderUserAvatarImageStyles = {
   'width': '50px',
   'height': '50px',
   'border-radius': '100%'
 };
 
-var communitySliderCardContentStyles = {
+var sliderCardContentStyles = {
   'display': 'table-cell',
   'vertical-align': 'top'
 };
 
-var communitySliderUserNameStyles = {
+var sliderUserNameStyles = {
   'color': '#1DADF5',
   'margin-right': '10px'
 };
 
-var communitySliderUserRankStyles = {
+var sliderUserRankStyles = {
 
 };
 
-var communitySliderCardTitleStyles = {
+var sliderCardTitleStyles = {
 
 };
 
-var communitySliderCardTextStyles = {
+var sliderCardTextStyles = {
 
-}
+};
 
-var communitySliderFooterStyles = {
-  'padding': '25px'
-}
-
-function CommunitySlider () {
+function SliderCard ($element, options, data) {
+  this.$element = $element;
+  // this.options = assing({}, defaults, options);
+  this.data = data;
   this.init();
 }
 
-function parseStylesHash (selector, stylesHash) {
-  var styles = selector + '{';
-  for (var rule in stylesHash) {
-    styles += rule + ':' + stylesHash[rule] + ';';
-  }
-  styles += '}';
-  return styles;
-}
-
-function getStyles () {
-  var $styles = $('<style>');
-  var styles = '';
-  styles += parseStylesHash('.insided-community', buttonStyles);
-  styles += parseStylesHash('.insided-community-slider', communitySliderStyles);
-  styles += parseStylesHash('.insided-community-slider__header', communitySliderHeaderStyles);
-  styles += parseStylesHash('.insided-community-slider__title', communitySliderTitleStyles);
-  styles += parseStylesHash('.insided-community-slider__close', communitySliderCloseButtonStyles);
-  styles += parseStylesHash('.insided-community-slider__cards', communitySliderCardsStyles);
-  styles += parseStylesHash('.insided-community-slider__card', communitySliderCardStyles);
-  styles += parseStylesHash('.insided-community-slider__user-avatar', communitySliderUserAvatarStyles);
-  styles += parseStylesHash('.insided-community-slider__user-avatar--image', communitySliderUserAvatarImageStyles);
-  styles += parseStylesHash('.insided-community-slider__card-content', communitySliderCardContentStyles);
-  styles += parseStylesHash('.insided-community-slider__user-name', communitySliderUserNameStyles);
-  styles += parseStylesHash('.insided-community-slider__user-rank', communitySliderUserRankStyles);
-  styles += parseStylesHash('.insided-community-slider__card-title', communitySliderCardTitleStyles);
-  styles += parseStylesHash('.insided-community-slider__card-text', communitySliderCardTextStyles);
-  styles += parseStylesHash('.insided-community-slider__footer', communitySliderFooterStyles);
-  $styles.text(styles);
-  return $styles;
-}
-
-function getButton () {
-  return $('<button>Community slider</button>')
-    .addClass('insided-community')
-    .on('click', function () {
-      $window.trigger('insided:community-slider:start');
-    });
-}
-
-function getSliderHeader () {
-  var $header = $('<header>')
-    .addClass('insided-community-slider__header');
-  var $title = $('<h3>Demo Community</h3>')
-    .addClass('insided-community-slider__title');
-  var $closeButton = $('<a href="#">X</a>')
-    .addClass('insided-community-slider__close')
-    .on('click', function (e) {
-      e.preventDefault();
-      $window.trigger('insided:community-slider:restart');
-    });
-  $header.append($title);
-  $header.append($closeButton);
-  return $header;
-}
-
-function getSliderFilters () {
-  var $filters = $('<div>')
-    .addClass('insided-community-slider__filters');
-  return $filters;
-}
-
-function getSliderCard () {
+function init () {
   var $card = $('<div>')
     .addClass('insided-community-slider__card')
   var $userAvatarImage = $('<img>')
-    .attr('src', 'https://media.licdn.com/mpr/mpr/shrinknp_100_100/AAEAAQAAAAAAAAhMAAAAJGY3ZDE2M2IyLTk0OWUtNGU5MC05NTQwLWI0ZGUyNTkyODk5NQ.jpg')
+    .attr('src', this.data.user.avatar)
     .addClass('insided-community-slider__user-avatar--image');
   var $userAvatar = $('<div>')
     .addClass('insided-community-slider__user-avatar')
     .append($userAvatarImage)
   var $userInfo = $('<div>')
     .addClass('insided-community-slider__user-info');
-  var $userName = $('<span>John</span>')
+  var $userName = $('<span>')
+    .text(this.data.user.name)
     .addClass('insided-community-slider__user-name');
-  var $userRank = $('<span>Johns rank</span>')
+  var $userRank = $('<span>')
+    .text(this.data.user.rank)
     .addClass('insided-community-slider__user-rank');
   $userInfo
     .append($userName)
@@ -10780,9 +11395,11 @@ function getSliderCard () {
 
   var $cardContent = $('<article>')
     .addClass('insided-community-slider__card-content');
-  var $cardTitle = $('<h4>This post is awesome dudeeee</h4>')
+  var $cardTitle = $('<h4>')
+    .text(this.data.title)
     .addClass('insided-community-slider__card-title');
-  var $cardText = $('<p>This is the content of the post ohh yeaaaah, ohh yeaahhh, the content of the post</p>')
+  var $cardText = $('<p>')
+    .text(this.data.content)
     .addClass('insided-community-slider__card-text');
   $cardContent
     .append($userInfo)
@@ -10791,65 +11408,306 @@ function getSliderCard () {
   $card
     .append($userAvatar)
     .append($cardContent);
-  return $card;
+  this.html = $card;
+  this.loadStyles();
+  return this;
 }
 
-function getSliderCards () {
-  var $cards = $('<div>')
-    .addClass('insided-community-slider__cards');
-  $cards.append(getSliderCard());
-  $cards.append(getSliderCard());
-  return $cards;
+function loadStyles () {
+  if (!stylesLoaded) {
+    styleLoader.addStyle('insided-community-slider__card', sliderCardStyles);
+    styleLoader.addStyle('insided-community-slider__user-avatar', sliderUserAvatarStyles);
+    styleLoader.addStyle('insided-community-slider__user-avatar--image', sliderUserAvatarImageStyles);
+    styleLoader.addStyle('insided-community-slider__card-content', sliderCardContentStyles);
+    styleLoader.addStyle('insided-community-slider__user-name', sliderUserNameStyles);
+    styleLoader.addStyle('insided-community-slider__user-rank', sliderUserRankStyles);
+    styleLoader.addStyle('insided-community-slider__card-title', sliderCardTitleStyles);
+    styleLoader.addStyle('insided-community-slider__card-text', sliderCardTextStyles);
+  }
+  stylesLoaded = true;
 }
 
-function getSliderFooter () {
-  var $footer = $('<footer>')
-    .text('This is the footer')
-    .addClass('insided-community-slider__footer');
-  return $footer;
+function render () {
+  this.getHtml().detach();
+  this.$element.append(this.getHtml());
+  return this;
 }
 
-function getSlider () {
-  var $slider = $('<div>')
-    .addClass('insided-community-slider');
-  $slider.append(getSliderHeader());
-  $slider.append(getSliderFilters());
-  $slider.append(getSliderCards());
-  $slider.append(getSliderFooter());
-  return $slider;
+function getHtml () {
+  return this.html;
 }
 
-function initSlider () {
-  this.$slider = this.getSlider();
-  $body.append(this.$slider);
-}
+SliderCard.prototype.init = init;
+SliderCard.prototype.loadStyles = loadStyles;
+SliderCard.prototype.render = render;
+SliderCard.prototype.getHtml = getHtml;
 
-function destroySlider () {
-  this.$slider.remove();
-  this.$slider = null;
+module.exports = SliderCard;
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var $ = __webpack_require__(0);
+var assign = __webpack_require__(1);
+
+var styleLoader = __webpack_require__(2);
+var DataLoader = __webpack_require__(5);
+
+var Card = __webpack_require__(8);
+
+var $window = $(window);
+
+var defaults = {
+  styles: {},
+  states: {
+    started: 'started',
+    loading: 'loading',
+    loaded: 'loaded'
+  }
+};
+
+function SliderCards ($element, options) {
+  this.$element = $element;
+  this.options = assign({}, defaults, options);
+  this.states = this.options.states;
+  this.cards = [];
+  this.dataLoader = new DataLoader(this.options.key);
+  this.init();
+  this.loadData();
 }
 
 function init () {
-  this.$button = this.getButton();
-  this.$styles = this.getStyles();
-  $body.append(this.$button);
-  $head.append(this.$styles);
-  $window.on('insided:community-slider:start', function () {
-    this.$button.hide();
-    this.initSlider();
-  }.bind(this));
-  $window.on('insided:community-slider:restart', function () {
-    this.$button.show();
-    this.destroySlider();
-  }.bind(this));
+  var $cards = $('<div>')
+    .addClass(this.states.started)
+    .addClass('insided-community-slider__cards');
+  this.html = $cards;
+  this.setState(this.states.started);
+  styleLoader.addStyle('insided-community-slider__cards', this.options.styles);
+  return this;
 }
 
-CommunitySlider.prototype.init = init;
-CommunitySlider.prototype.getButton = getButton;
-CommunitySlider.prototype.getStyles = getStyles;
-CommunitySlider.prototype.getSlider = getSlider;
-CommunitySlider.prototype.initSlider = initSlider;
-CommunitySlider.prototype.destroySlider = destroySlider;
+function setState (state) {
+  if (this.state) {
+    this.getHtml().removeClass(this.state);
+  }
+  this.getHtml().addClass(state);
+  this.state = state;
+  $window.trigger('insided:community-slider:change', this.state);
+}
+
+function setLoadedState () {
+  this.setState(this.states.loaded);
+}
+
+function loadData () {
+  this.setState(this.states.loading);
+  return this.dataLoader.fetch()
+    .then(this.renderCards.bind(this))
+    .then(this.setLoadedState.bind(this));
+}
+
+function renderCard (cardData) {
+  var card = new Card(this.getHtml(), this.options, cardData);
+  this.cards.push(card);
+  card.render();
+}
+
+function renderCards (data) {
+  data.forEach(this.renderCard.bind(this));
+}
+
+function render () {
+  this.getHtml().detach();
+  this.$element.append(this.getHtml());
+  return this;
+}
+
+function getHtml () {
+  return this.html;
+}
+
+SliderCards.prototype.init = init;
+SliderCards.prototype.getHtml = getHtml;
+SliderCards.prototype.render = render;
+SliderCards.prototype.setState = setState;
+SliderCards.prototype.setLoadedState = setLoadedState;
+SliderCards.prototype.loadData = loadData;
+SliderCards.prototype.renderCards = renderCards;
+SliderCards.prototype.renderCard = renderCard;
+
+module.exports = SliderCards;
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function SliderFilters () {
+
+}
+
+function render () {
+  
+}
+
+SliderFilters.prototype.render = render;
+
+module.exports = SliderFilters;
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var $ = __webpack_require__(0);
+var assign = __webpack_require__(1);
+
+var styleLoader = __webpack_require__(2);
+
+var sliderFooterStyles = {
+  'padding': '25px'
+}
+
+var defaults = {
+  styles: sliderFooterStyles
+};
+
+function SliderFooter ($element, options) {
+  this.$element = $element;
+  this.options = assign({}, defaults, options);
+  this.init();
+}
+
+function init () {
+  var $footer = $('<footer>')
+    .text('This is the footer')
+    .addClass('insided-community-slider__footer');
+  this.html = $footer;
+  styleLoader.addStyle('insided-community-slider__footer', this.options.styles);
+  return this;
+}
+
+function getHtml () {
+  return this.html;
+}
+
+function render () {
+  this.getHtml().detach();
+  this.$element.append(this.getHtml());
+  return this;
+}
+
+SliderFooter.prototype.init = init;
+SliderFooter.prototype.getHtml = getHtml;
+SliderFooter.prototype.render = render;
+
+module.exports = SliderFooter;
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var $ = __webpack_require__(0);
+var assign = __webpack_require__(1);
+
+var styleLoader = __webpack_require__(2);
+
+var $window = $(window);
+
+var sliderHeaderStyles = {
+  'position': 'relative',
+  'background-color': '#1DADF5',
+  'padding': '25px',
+  'color': '#FFF'
+};
+
+var sliderTitleStyles = {
+  'margin-top': 0
+};
+
+var sliderCloseButtonStyles = {
+  'position': 'absolute',
+  'text-decoration': 'none',
+  'right': '25px',
+  'top': '25px',
+  'color': '#FFF'
+};
+
+var defaults = {
+  styles: sliderHeaderStyles,
+  title: 'Community',
+  cssClass: 'insided-community-slider__header'
+};
+
+function triggerRestart (e) {
+  e.preventDefault();
+  $window.trigger('insided:community-slider:restart');
+}
+
+function SliderHeader ($element, options) {
+  this.$element = $element;
+  this.options = assign({}, defaults, options);
+  this.init();
+}
+
+function init () {
+  var $header = $('<header>')
+    .addClass(this.options.cssClass);
+  var $title = $('<h3>')
+    .text(this.options.title)
+    .addClass('insided-community-slider__title');
+  var $closeButton = $('<a href="#">X</a>')
+    .addClass('insided-community-slider__close')
+    .on('click', triggerRestart);
+  $header.append($title);
+  $header.append($closeButton);
+  this.html = $header;
+  styleLoader.addStyle(this.options.cssClass, this.options.styles);
+  styleLoader.addStyle('insided-community-slider__title', sliderTitleStyles);
+  styleLoader.addStyle('insided-community-slider__close', sliderCloseButtonStyles);
+  return this;
+}
+
+function getHtml () {
+  return this.html;
+}
+
+function render () {
+  this.getHtml().detach();
+  this.$element.append(this.getHtml());
+  return this;
+}
+
+SliderHeader.prototype.init = init;
+SliderHeader.prototype.getHtml = getHtml;
+SliderHeader.prototype.render = render;
+
+module.exports = SliderHeader;
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var CommunitySlider = __webpack_require__(3);
 
 new CommunitySlider({});
 
