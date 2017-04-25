@@ -16,8 +16,9 @@ var defaults = {
   padding: '25px'
 };
 
+function noop () {}
+
 function CommunitySlider (options) {
-  debugger;
   this.options = assign({}, defaults, options);;
   this.element = this.options.element;
   this.$element = $(this.element);
@@ -29,11 +30,24 @@ function CommunitySlider (options) {
 function onCommunitySliderStart () {
   this.button.hide();
   this.slider.render();
+  this.onStart();
 }
 
 function onCommunitySliderRestart () {
   this.button.show();
   this.slider.destroy();
+  this.onRestart();
+}
+
+function destroy () {
+  this.button.destroy();
+  this.slider.destroy();
+  $window.off('insided:community-slider:start');
+  $window.off('insided:community-slider:restart');
+}
+
+function start () {
+  $window.trigger('insided:community-slider:start');
 }
 
 function init () {
@@ -43,6 +57,10 @@ function init () {
 }
 
 CommunitySlider.prototype.init = init;
+CommunitySlider.prototype.start = start;
+CommunitySlider.prototype.destroy = destroy;
+CommunitySlider.prototype.onStart = noop;
+CommunitySlider.prototype.onRestart = noop;
 CommunitySlider.prototype.onCommunitySliderStart = onCommunitySliderStart;
 CommunitySlider.prototype.onCommunitySliderRestart = onCommunitySliderRestart;
 

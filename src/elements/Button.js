@@ -69,7 +69,13 @@ function hide () {
   return this;
 }
 
+function destroy () {
+  this.getHtml().detach();
+  return this;
+}
+
 Button.prototype.init = init;
+Button.prototype.destroy = destroy;
 Button.prototype.getHtml = getHtml;
 Button.prototype.render = render;
 Button.prototype.show = show;
