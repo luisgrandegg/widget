@@ -24,7 +24,7 @@ function SliderCards ($element, options) {
   this.states = this.options.states;
   this.cards = [];
   this.cssClass = this.options.cssNamespace + '__cards';
-  this.dataLoader = new DataLoader(this.options.key);
+  this.dataLoader = new DataLoader(this.options);
   this.init();
   this.loadData();
 }

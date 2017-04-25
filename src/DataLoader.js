@@ -2,16 +2,12 @@
 
 var $ = require('jquery');
 
-var mockData = require('../data/posts');
-
-function DataLoader (key) {
-  this.key = key;
+function DataLoader (options) {
+  this.options = options;
 }
 
 function fetch () {
-  var $deferred = $.Deferred();
-  $deferred.resolve(mockData);
-  return $deferred.promise();
+  return $.get(this.options.searchUrl);
 }
 
 DataLoader.prototype.fetch = fetch;
