@@ -11,10 +11,13 @@ var $window = $(window);
 
 var defaults = {
   element: 'body',
-  cssNamespace: 'insided-community'
+  cssNamespace: 'insided-community',
+  brandColor: '#1DADF5',
+  padding: '25px'
 };
 
 function CommunitySlider (options) {
+  debugger;
   this.options = assign({}, defaults, options);;
   this.element = this.options.element;
   this.$element = $(this.element);

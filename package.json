@@ -2,7 +2,7 @@
   "name": "widget",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "prebuild": "mkdir -p dist",
     "build": "webpack",

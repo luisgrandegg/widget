@@ -7,25 +7,26 @@ var styleLoader = require('../styleLoader');
 
 var $window = $(window);
 
-var buttonStyles = {
-  'position': 'fixed',
-  'border': 0,
-  'border-radius': '2px',
-  'background-color': '#1DADF5',
-  'z-index': 999999,
-  'right': 0,
-  'top': '50%',
-  'margin-top': '-20px',
-  'color': '#FFF',
-  'font-size': '16px',
-  'padding': '15px',
-  'cursor': 'pointer'
+var defaults = {
+  buttonText: 'Community Help'
 };
 
-var defaults = {
-  styles: buttonStyles,
-  text: 'Community Help'
-};
+function getButtonStyles (options) {
+  return {
+    'position': 'fixed',
+    'border': 0,
+    'border-radius': '2px',
+    'background-color': options.brandColor,
+    'z-index': 999999,
+    'right': 0,
+    'top': '50%',
+    'margin-top': '-20px',
+    'color': '#FFF',
+    'font-size': '16px',
+    'padding': '15px',
+    'cursor': 'pointer'
+  };
+}
 
 function triggerStart () {
   $window.trigger('insided:community-slider:start');
@@ -39,20 +40,17 @@ function Button ($element, options) {
 }
 
 function init () {
-  var $button = $('<button>' + this.options.text +'</button>')
+  var $button = $('<button>')
+    .text(this.options.buttonText)
     .addClass(this.cssClass)
     .on('click', triggerStart);
   this.html = $button;
-  styleLoader.addStyle(this.cssClass, this.options.styles);
+  styleLoader.addStyle(this.cssClass, getButtonStyles(this.options));
   return this;
 }
 
 function getHtml () {
   return this.html;
-}
-
-function getStyles () {
-  return this.options.styles;
 }
 
 function render () {
@@ -73,7 +71,6 @@ function hide () {
 
 Button.prototype.init = init;
 Button.prototype.getHtml = getHtml;
-Button.prototype.getStyles = getStyles;
 Button.prototype.render = render;
 Button.prototype.show = show;
 Button.prototype.hide = hide;

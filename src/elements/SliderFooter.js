@@ -5,26 +5,29 @@ var assign = require('lodash.assign');
 
 var styleLoader = require('../styleLoader');
 
-var sliderFooterStyles = {
-  'padding': '25px'
+function getSliderFooterStyles (options) {
+  return {
+    'padding': options.padding
+  };
 }
 
 var defaults = {
-  styles: sliderFooterStyles
+  footerText: 'I am a footer'
 };
 
 function SliderFooter ($element, options) {
   this.$element = $element;
   this.options = assign({}, defaults, options);
+  this.cssClass = this.options.cssNamespace + '__footer';
   this.init();
 }
 
 function init () {
   var $footer = $('<footer>')
-    .text('This is the footer')
-    .addClass('insided-community-slider__footer');
+    .text(this.options.footerText)
+    .addClass(this.cssClass);
   this.html = $footer;
-  styleLoader.addStyle('insided-community-slider__footer', this.options.styles);
+  styleLoader.addStyle(this.cssClass, getSliderFooterStyles(this.options));
   return this;
 }
 

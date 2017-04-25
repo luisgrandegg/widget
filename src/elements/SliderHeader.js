@@ -7,29 +7,33 @@ var styleLoader = require('../styleLoader');
 
 var $window = $(window);
 
-var sliderHeaderStyles = {
-  'position': 'relative',
-  'background-color': '#1DADF5',
-  'padding': '25px',
-  'color': '#FFF'
-};
+function getHeaderStyles (options) {
+  return {
+    'position': 'relative',
+    'background-color': options.brandColor,
+    'padding': options.padding,
+    'color': '#FFF'
+  };
+}
 
-var sliderTitleStyles = {
-  'margin-top': 0
-};
+function getSliderTitleStyles () {
+  return {
+    'margin-top': 0
+  };
+}
 
-var sliderCloseButtonStyles = {
-  'position': 'absolute',
-  'text-decoration': 'none',
-  'right': '25px',
-  'top': '25px',
-  'color': '#FFF'
-};
+function getSliderCloseButtonStyles (options) {
+  return {
+    'position': 'absolute',
+    'text-decoration': 'none',
+    'right': options.padding,
+    'top': options.padding,
+    'color': '#FFF'
+  };
+}
 
 var defaults = {
-  styles: sliderHeaderStyles,
-  title: 'Community',
-  cssClass: 'insided-community-slider__header'
+  headerTitle: 'Community'
 };
 
 function triggerRestart (e) {
@@ -40,24 +44,29 @@ function triggerRestart (e) {
 function SliderHeader ($element, options) {
   this.$element = $element;
   this.options = assign({}, defaults, options);
+  this.cssClass = {
+    header: this.options.cssNamespace + '__header',
+    title: this.options.cssNamespace + '__title',
+    closeButton: this.options.cssNamespace + '__close'
+  };
   this.init();
 }
 
 function init () {
   var $header = $('<header>')
-    .addClass(this.options.cssClass);
+    .addClass(this.cssClass.header);
   var $title = $('<h3>')
-    .text(this.options.title)
-    .addClass('insided-community-slider__title');
+    .text(this.options.headerTitle)
+    .addClass(this.cssClass.title);
   var $closeButton = $('<a href="#">X</a>')
-    .addClass('insided-community-slider__close')
+    .addClass(this.cssClass.closeButton)
     .on('click', triggerRestart);
   $header.append($title);
   $header.append($closeButton);
   this.html = $header;
-  styleLoader.addStyle(this.options.cssClass, this.options.styles);
-  styleLoader.addStyle('insided-community-slider__title', sliderTitleStyles);
-  styleLoader.addStyle('insided-community-slider__close', sliderCloseButtonStyles);
+  styleLoader.addStyle(this.cssClass.header, getHeaderStyles(this.options));
+  styleLoader.addStyle(this.cssClass.title, getSliderTitleStyles());
+  styleLoader.addStyle(this.cssClass.closeButton, getSliderCloseButtonStyles(this.options));
   return this;
 }
 

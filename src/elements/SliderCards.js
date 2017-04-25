@@ -11,7 +11,6 @@ var Card = require('./SliderCard');
 var $window = $(window);
 
 var defaults = {
-  styles: {},
   states: {
     started: 'started',
     loading: 'loading',
@@ -24,6 +23,7 @@ function SliderCards ($element, options) {
   this.options = assign({}, defaults, options);
   this.states = this.options.states;
   this.cards = [];
+  this.cssClass = this.options.cssNamespace + '__cards';
   this.dataLoader = new DataLoader(this.options.key);
   this.init();
   this.loadData();
@@ -32,10 +32,9 @@ function SliderCards ($element, options) {
 function init () {
   var $cards = $('<div>')
     .addClass(this.states.started)
-    .addClass('insided-community-slider__cards');
+    .addClass(this.cssClass);
   this.html = $cards;
   this.setState(this.states.started);
-  styleLoader.addStyle('insided-community-slider__cards', this.options.styles);
   return this;
 }
 

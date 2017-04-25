@@ -7,84 +7,95 @@ var styleLoader = require('../styleLoader');
 
 var stylesLoaded = false;
 
-var sliderCardStyles = {
-  'padding': '25px',
-  'border-bottom': '1px solid black',
-  'display': 'table'
+function getSliderCardStyles (options) {
+  return {
+    'padding': options.padding,
+    'border-bottom': '1px solid black',
+    'display': 'table'
+  };
+}
+
+function getSliderUserAvatarStyles (options) {
+  return {
+    'display': 'table-cell',
+    'vertical-align': 'top',
+    'text-align': 'center',
+    'overflow': 'hidden',
+    'padding-right': options.padding,
+    'box-sizing': 'border-box',
+    'min-width': '75px'
+  };
 };
 
-var sliderUserAvatarStyles = {
-  'display': 'table-cell',
-  'vertical-align': 'top',
-  'text-align': 'center',
-  'overflow': 'hidden',
-  'padding-right': '25px'
-};
+function getSliderUserAvatarImageStyles () {
+  return {
+    'width': '50px',
+    'height': '50px',
+    'border-radius': '100%'
+  };
+}
 
-var sliderUserAvatarImageStyles = {
-  'width': '50px',
-  'height': '50px',
-  'border-radius': '100%'
-};
+function getSliderCardContentStyles () {
+  return {
+    'display': 'table-cell',
+    'vertical-align': 'top'
+  };
+}
 
-var sliderCardContentStyles = {
-  'display': 'table-cell',
-  'vertical-align': 'top'
-};
-
-var sliderUserNameStyles = {
-  'color': '#1DADF5',
-  'margin-right': '10px'
-};
-
-var sliderUserRankStyles = {
-
-};
-
-var sliderCardTitleStyles = {
-
-};
-
-var sliderCardTextStyles = {
-
-};
+function getSliderUserNameStyles (options) {
+  return {
+    'color': options.brandColor,
+    'margin-right': '10px'
+  };
+}
 
 function SliderCard ($element, options, data) {
   this.$element = $element;
-  // this.options = assing({}, defaults, options);
   this.data = data;
+  this.options = options;
+  this.cssClass = {
+    card: this.options.cssNamespace + '__card',
+    userAvatar: this.options.cssNamespace + '__user-avatar',
+    userAvatarImage: this.options.cssNamespace + '__user-avatar--image',
+    userInfo: this.options.cssNamespace + '__user-info',
+    userName: this.options.cssNamespace + '__user-name',
+    userRank: this.options.cssNamespace + '__user-rank',
+    cardContent: this.options.cssNamespace + '__card-content',
+    cardTitle: this.options.cssNamespace + '__card-title',
+    cardText: this.options.cssNamespace + '__card-text'
+  };
   this.init();
 }
 
 function init () {
-  var $card = $('<div>')
-    .addClass('insided-community-slider__card')
+  var $card = $('<article>')
+    .addClass(this.cssClass.card)
   var $userAvatarImage = $('<img>')
     .attr('src', this.data.user.avatar)
-    .addClass('insided-community-slider__user-avatar--image');
+    .addClass(this.cssClass.userAvatarImage);
   var $userAvatar = $('<div>')
-    .addClass('insided-community-slider__user-avatar')
+    .addClass(this.cssClass.userAvatar)
     .append($userAvatarImage)
   var $userInfo = $('<div>')
-    .addClass('insided-community-slider__user-info');
+    .addClass(this.cssClass.userInfo);
   var $userName = $('<span>')
     .text(this.data.user.name)
-    .addClass('insided-community-slider__user-name');
+    .addClass(this.cssClass.userName);
   var $userRank = $('<span>')
     .text(this.data.user.rank)
-    .addClass('insided-community-slider__user-rank');
+    .addClass(this.cssClass.userRank);
   $userInfo
     .append($userName)
     .append($userRank);
 
-  var $cardContent = $('<article>')
-    .addClass('insided-community-slider__card-content');
+  var $cardContent = $('<div>')
+    .addClass(this.cssClass.cardContent);
   var $cardTitle = $('<h4>')
     .text(this.data.title)
-    .addClass('insided-community-slider__card-title');
+    .addClass(this.cssClass.cardTitle);
   var $cardText = $('<p>')
     .text(this.data.content)
-    .addClass('insided-community-slider__card-text');
+    .addClass(this.cssClass.cardText);
   $cardContent
     .append($userInfo)
     .append($cardTitle)
@@ -99,14 +110,11 @@ function init () {
 
 function loadStyles () {
   if (!stylesLoaded) {
-    styleLoader.addStyle('insided-community-slider__card', sliderCardStyles);
-    styleLoader.addStyle('insided-community-slider__user-avatar', sliderUserAvatarStyles);
-    styleLoader.addStyle('insided-community-slider__user-avatar--image', sliderUserAvatarImageStyles);
-    styleLoader.addStyle('insided-community-slider__card-content', sliderCardContentStyles);
-    styleLoader.addStyle('insided-community-slider__user-name', sliderUserNameStyles);
-    styleLoader.addStyle('insided-community-slider__user-rank', sliderUserRankStyles);
-    styleLoader.addStyle('insided-community-slider__card-title', sliderCardTitleStyles);
-    styleLoader.addStyle('insided-community-slider__card-text', sliderCardTextStyles);
+    styleLoader.addStyle(this.cssClass.card, getSliderCardStyles(this.options));
+    styleLoader.addStyle(this.cssClass.userAvatar, getSliderUserAvatarStyles(this.options));
+    styleLoader.addStyle(this.cssClass.userAvatarImage, getSliderUserAvatarImageStyles());
+    styleLoader.addStyle(this.cssClass.cardContent, getSliderCardContentStyles());
+    styleLoader.addStyle(this.cssClass.userName, getSliderUserNameStyles(this.options));
   }
   stylesLoaded = true;
 }

@@ -2,4 +2,4 @@
 
 var CommunitySlider = require('./index');
 
-new CommunitySlider({});
+new CommunitySlider();
