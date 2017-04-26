@@ -11,7 +11,8 @@ function getSliderCardStyles (options) {
   return {
     'padding': options.padding,
     'border-bottom': '1px solid black',
-    'display': 'table'
+    'display': 'table',
+    'width': '100%'
   };
 }
 
@@ -21,9 +22,9 @@ function getSliderUserAvatarStyles (options) {
     'vertical-align': 'top',
     'text-align': 'center',
     'overflow': 'hidden',
-    'padding-right': options.padding,
+    'padding-right': '25px',
     'box-sizing': 'border-box',
-    'min-width': '75px'
+    'width': '75px'
   };
 };
 
