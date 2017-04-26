@@ -13,7 +13,8 @@ var defaults = {
   element: 'body',
   cssNamespace: 'insided-community',
   brandColor: '#1DADF5',
-  padding: '25px'
+  padding: '25px',
+  animationTime: '1000'
 };
 
 function noop () {}

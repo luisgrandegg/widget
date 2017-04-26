@@ -60,8 +60,11 @@ function render () {
 }
 
 function show () {
-  this.getHtml().show();
-  return this;
+  var self = this;
+  setTimeout(function () {
+    self.getHtml().show();
+  }, self.options.animationTime);
+  return self;
 }
 
 function hide () {
