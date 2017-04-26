@@ -2,4 +2,6 @@
 
 var CommunitySlider = require('./index');
 
-new CommunitySlider();
+new CommunitySlider({
+  searchUrl: './posts.json'
+});
