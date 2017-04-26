@@ -13,8 +13,7 @@ function fetch () {
   var self = this;
   return self.dataParser.getData()
     .then(function (parsedData) {
-      self.options.parsed_data = parsedData;
-      return $.get(self.options.searchUrl);
+      return $.get(self.options.searchUrl, parsedData);
     });
 }
 
