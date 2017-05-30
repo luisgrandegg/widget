@@ -92,8 +92,17 @@ function init () {
   var $cardContent = $('<div>')
     .addClass(this.cssClass.cardContent);
   var $cardTitle = $('<h4>')
-    .text(this.data.title)
-    .addClass(this.cssClass.cardTitle);
+    .addClass(this.cssClass.cardTitle)
+    .append(
+      $('<a>')
+      .attr('target', '_blank')
+      .attr('href', this.data.url)
+      css({
+        'color': 'inherit',
+        'font-weight': 'bold'
+      })
+      .text(this.data.title);
+    );
   var $cardText = $('<p>')
     .text(this.data.content)
     .addClass(this.cssClass.cardText);
