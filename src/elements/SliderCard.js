@@ -36,6 +36,12 @@ function getSliderUserAvatarImageStyles () {
   };
 }
 
+function getSliderCardTextStyles () {
+  return {
+    'white-space': 'pre-line'
+  };
+}
+
 function getSliderCardContentStyles () {
   return {
     'display': 'table-cell',
@@ -97,11 +103,11 @@ function init () {
       $('<a>')
       .attr('target', '_blank')
       .attr('href', this.data.url)
-      css({
+      .css({
         'color': 'inherit',
         'font-weight': 'bold'
       })
-      .text(this.data.title);
+      .text(this.data.title)
     );
   var $cardText = $('<p>')
     .text(this.data.content)
@@ -123,6 +129,7 @@ function loadStyles () {
     styleLoader.addStyle(this.cssClass.card, getSliderCardStyles(this.options));
     styleLoader.addStyle(this.cssClass.userAvatar, getSliderUserAvatarStyles(this.options));
     styleLoader.addStyle(this.cssClass.userAvatarImage, getSliderUserAvatarImageStyles());
+    styleLoader.addStyle(this.cssClass.cardText, getSliderCardTextStyles());
     styleLoader.addStyle(this.cssClass.cardContent, getSliderCardContentStyles());
     styleLoader.addStyle(this.cssClass.userName, getSliderUserNameStyles(this.options));
   }
